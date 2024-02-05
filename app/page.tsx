@@ -1,113 +1,132 @@
-import Image from "next/image";
+import CryptoJS from 'crypto-js';
 
-export default function Home() {
+function generateCodeVerifier() {
+  return generateRandomString(96);
+}
+
+function generateRandomString(length) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (var i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+function generateCodeChallenge(code_verifier) {
+  return CryptoJS.SHA256(code_verifier);
+}
+
+function base64URL(string) {
+  return string.toString(CryptoJS.enc.Base64).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+}
+
+var verifier = base64URL(generateCodeVerifier());
+var challenge = base64URL(generateCodeChallenge(verifier));
+
+
+const DATA_SOURSE_VERIFICATTION_START = "https://kv7kzm78.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/f_ecom_zzrl_059/oauth2/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&response_type=code&client_id=aeef000c-c4c6-4e7e-96db-a98ee36c6292&hint=guest&code_challenge="
+
+async function GetTokenRequestVars() { 
+  //console.log('request from api challenge' ,challenge); 
+  var url = DATA_SOURSE_VERIFICATTION_START + challenge;
+  //console.log('request from api url' ,url);
+  const res = await fetch(url, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    redirect: "manual" 
+  })   
+  //console.log('response from api GetTokenRequestVars' ,res);  
+  var test = await res; 
+  //console.log('response from api GetTokenRequestVars test' ,test.headers);
+  return await res;  
+}
+const DATA_SOURSE_URL_GET_TOKEN = "https://kv7kzm78.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/f_ecom_zzrl_059/oauth2/token"
+
+function Format(linkString) {
+  var mySubStringCode= linkString.substring(
+    linkString.indexOf("code=") + 5
+); 
+var mySubStringUsid = linkString.substring( 
+  linkString.indexOf("usid=") + 5, 
+  linkString.lastIndexOf("&")
+);
+  return [mySubStringCode, mySubStringUsid];
+}
+
+async function GetToken() {
+  const reponse = await GetTokenRequestVars(); 
+  //onsole.log('The reponse' ,reponse.headers.get('location')); 
+  var stringValue = Format(reponse.headers.get('location'));
+  //console.log('TheTokenStringValue' ,stringValue);  
+  const res = await fetch(DATA_SOURSE_URL_GET_TOKEN, { 
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    method: 'POST',
+    redirect: "manual" , 
+    body: new URLSearchParams({
+      'code': stringValue[0], 
+      'grant_type': 'authorization_code_pkce',
+      'redirect_uri': 'http://localhost:3000/callback',
+      'code_verifier': verifier,
+      'channel_id': 'RefArch',
+      'client_id': 'aeef000c-c4c6-4e7e-96db-a98ee36c6292',
+      'usid': stringValue[1] 
+    })
+  
+  })
+
+  const result = await res.json(); 
+  //console.log('response from api GetToken' ,result);  
+  return result;
+  
+}
+const DATA_SOURSE_URL_GET_PRODUCTS = "https://kv7kzm78.api.commercecloud.salesforce.com/search/shopper-search/v1/organizations/f_ecom_zzrl_059/product-search?siteId=RefArch&q=shirt"
+
+  async function GetProducts() { 
+    const token = await GetToken();
+    const res = await fetch(DATA_SOURSE_URL_GET_PRODUCTS, {
+      headers: {
+        Authorization: 'Bearer ' + token.access_token,
+        "Content-Type": "application/json" 
+      } 
+    });
+    const result = await res.json(); 
+     console.log('response from api' ,result.hits);   
+    //  console.log('response from api' ,result.data[0].imageGroups[0].images[0].alt);
+
+    return result.hits;
+    
+  }
+
+
+export default async function Example() {
+  const responsess = await GetProducts();
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="bg-white">
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+        <h2 className="sr-only">Products</h2>
+
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+          {responsess.map((responsess) => (
+            <a key={responsess.API} href={responsess.slugUrl} className="group">
+              <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
+                <img
+                  src={responsess.image.disBaseLink}
+                  alt={responsess.image.alt}
+                  className="h-full w-full object-cover object-center group-hover:opacity-75"
+                />
+              </div>
+              <p className="mt-1 text-lg font-medium text-gray-900">{responsess.name}</p>
+              <p className="mt-1 text-lg font-medium text-gray-900">{responsess.price} {responsess.currency}</p>
+              <p className="mt-1 text-lg font-medium text-gray-900">Details:</p>
+              <h6 className="mt-4 text-sm text-gray-700">{responsess.longDescription}</h6>
+            </a>
+          ))}
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+    </div>
+  )
 }
