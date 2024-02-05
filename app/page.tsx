@@ -24,10 +24,10 @@ function base64URL(string) {
 var verifier = base64URL(generateCodeVerifier());
 var challenge = base64URL(generateCodeChallenge(verifier));
 
-
 const DATA_SOURSE_VERIFICATTION_START = "https://kv7kzm78.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/f_ecom_zzrl_059/oauth2/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&response_type=code&client_id=aeef000c-c4c6-4e7e-96db-a98ee36c6292&hint=guest&code_challenge="
 
 async function GetTokenRequestVars() { 
+  //CAll1 
   //console.log('request from api challenge' ,challenge); 
   var url = DATA_SOURSE_VERIFICATTION_START + challenge;
   //console.log('request from api url' ,url);
@@ -65,7 +65,7 @@ async function GetToken() {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     method: 'POST',
-    redirect: "manual" , 
+    redirect: "manual", 
     body: new URLSearchParams({
       'code': stringValue[0], 
       'grant_type': 'authorization_code_pkce',
