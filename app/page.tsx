@@ -39,7 +39,6 @@ async function GetTokenRequestVars() {
     redirect: "manual" 
   })   
   //console.log('response from api GetTokenRequestVars' ,res);  
-  var test = await res; 
   //console.log('response from api GetTokenRequestVars test' ,test.headers);
   return await res;  
 }
