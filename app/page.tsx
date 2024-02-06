@@ -95,7 +95,7 @@ const DATA_SOURSE_URL_GET_PRODUCTS = "https://kv7kzm78.api.commercecloud.salesfo
     });
     const result = await res.json(); 
      console.log('response from api' ,result.hits);   
-    //  console.log('response from api' ,result.data[0].imageGroups[0].images[0].alt);
+    console.log('response from api' ,result.hits[0].variationAttributes.values[0]);
 
     return result.hits;
     
@@ -111,7 +111,7 @@ export default async function Example() {
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           {responsess.map((responsess) => (
-            <a key={responsess.API} href={responsess.slugUrl} className="group">
+            <a key={responsess.productId} href={responsess.link} className="group">
               <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
                 <img
                   src={responsess.image.disBaseLink}
@@ -119,7 +119,7 @@ export default async function Example() {
                   className="h-full w-full object-cover object-center group-hover:opacity-75"
                 />
               </div>
-              <p className="mt-1 text-lg font-medium text-gray-900">{responsess.name}</p>
+              <p className="mt-1 text-lg font-medium text-gray-900">{responsess.productName}</p>
               <p className="mt-1 text-lg font-medium text-gray-900">{responsess.price} {responsess.currency}</p>
               <p className="mt-1 text-lg font-medium text-gray-900">Details:</p>
               <h6 className="mt-4 text-sm text-gray-700">{responsess.longDescription}</h6>

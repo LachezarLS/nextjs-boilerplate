@@ -3,10 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prep": "npm install next react react-dom eslint rimraf -g && yarn add --dev eslint",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "format": "prettier --ignore-path .prettierignore --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "lint": "eslint --ignore-path .eslintignore . --ext ts --ext tsx --ext js --ext jsx",
+    "lint:fix": "yarn format & next lint --dir src",
+    "clean-cache": "rimraf .next",
+    "rimraf": "./node_modules/rimraf/bin.js",
+    "clean": "yarn prep && rimraf node_modules"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
@@ -26,4 +32,5 @@
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }
+
 }
