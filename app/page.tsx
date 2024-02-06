@@ -1,10 +1,11 @@
 import CryptoJS from 'crypto-js';
+import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal, PromiseLikeOfReactNode } from 'react';
 
 function generateCodeVerifier() {
   return generateRandomString(96);
 }
 
-function generateRandomString(length) {
+function generateRandomString(length: number) {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (var i = 0; i < length; i++) {
@@ -13,11 +14,11 @@ function generateRandomString(length) {
   return text;
 }
 
-function generateCodeChallenge(code_verifier) {
+function generateCodeChallenge(code_verifier: string | CryptoJS.lib.WordArray) {
   return CryptoJS.SHA256(code_verifier);
 }
 
-function base64URL(string) {
+function base64URL(string: string | CryptoJS.lib.WordArray) {
   return string.toString(CryptoJS.enc.Base64).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
 }
 
@@ -44,7 +45,7 @@ async function GetTokenRequestVars() {
 }
 const DATA_SOURSE_URL_GET_TOKEN = "https://kv7kzm78.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/f_ecom_zzrl_059/oauth2/token"
 
-function Format(linkString) {
+function Format(linkString: string | null) {
   var mySubStringCode= linkString.substring(
     linkString.indexOf("code=") + 5
 ); 
@@ -110,7 +111,7 @@ export default async function Example() {
         <h2 className="sr-only">Products</h2>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-          {responsess.map((responsess) => (
+          {responsess.map((responsess: { productId: Key | null | undefined; link: string | undefined; image: { disBaseLink: string | undefined; alt: string | undefined; }; productName: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; price: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; currency: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; longDescription: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; }) => (
             <a key={responsess.productId} href={responsess.link} className="group">
               <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
                 <img
