@@ -22,12 +22,15 @@ function base64URL(string: string | CryptoJS.lib.WordArray) {
   return string.toString(CryptoJS.enc.Base64).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
 }
 
-var verifier = base64URL(generateCodeVerifier());
-var challenge = base64URL(generateCodeChallenge(verifier));
+function getVerifierAndChallenge() {
+  var verifier = base64URL(generateCodeVerifier());
+  var challenge = base64URL(generateCodeChallenge(verifier));
+  return [verifier, challenge];
+}
 
 const DATA_SOURSE_VERIFICATTION_START = "https://kv7kzm78.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/f_ecom_zzrl_059/oauth2/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&response_type=code&client_id=aeef000c-c4c6-4e7e-96db-a98ee36c6292&hint=guest&code_challenge="
 
-async function GetTokenRequestVars() { 
+async function GetTokenRequestVars(challenge) { 
   //CAll1 
   //console.log('request from api challenge' ,challenge); 
   var url = DATA_SOURSE_VERIFICATTION_START + challenge;
@@ -59,11 +62,11 @@ function Format(linkString: string | null) {
   return [mySubStringCode, mySubStringUsid];
 }
 
-async function GetToken() {
-  const reponse = await GetTokenRequestVars(); 
+async function GetToken(varStrings: any[]) {
+  const reponse = await GetTokenRequestVars(varStrings[1]); 
   //onsole.log('The reponse' ,reponse.headers.get('location')); 
   var stringValue = Format(reponse.headers.get('location'));
-  console.log('TheTokenStringValue' ,stringValue);  
+  //console.log('TheTokenStringValue' ,stringValue);  
   const res = await fetch(DATA_SOURSE_URL_GET_TOKEN, { 
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -74,7 +77,7 @@ async function GetToken() {
       'code': stringValue[0],
       'grant_type': 'authorization_code_pkce',
       'redirect_uri': 'http://localhost:3000/callback',
-      'code_verifier': verifier,
+      'code_verifier': varStrings[0],
       'channel_id': 'RefArch',
       'client_id': 'aeef000c-c4c6-4e7e-96db-a98ee36c6292',
       'usid': stringValue[1]
@@ -83,22 +86,23 @@ async function GetToken() {
   })
 
   const result = await res.json(); 
-  console.log('response from api GetToken' ,result);  
+  //console.log('response from api GetToken' ,result);  
   return result;
   
 }
 const DATA_SOURSE_URL_GET_PRODUCTS = "https://kv7kzm78.api.commercecloud.salesforce.com/search/shopper-search/v1/organizations/f_ecom_zzrl_059/product-search?siteId=RefArch&q=shirt"
 
   async function GetProducts() { 
-    const token = await GetToken();
+    const varStrings = getVerifierAndChallenge()
+    const token = await GetToken(varStrings);
     const res = await fetch(DATA_SOURSE_URL_GET_PRODUCTS, {
       headers: {
-        Authorization: 'Bearer ' + token.access_token,
+        Authorization: 'Bearer ' + token.access_token ,
         "Content-Type": "application/json" 
       } 
     });
     const result = await res.json(); 
-    console.log('response from api' ,result.hits);   
+    //console.log('response from api' ,result.hits);   
     // console.log('response from api' ,result.hits[0].variationAttributes.values[0]);
 
     return result.hits;
@@ -109,7 +113,7 @@ const DATA_SOURSE_URL_GET_PRODUCTS = "https://kv7kzm78.api.commercecloud.salesfo
 export default async function Example() {
 
   const responsess = await GetProducts();
-  console.log('react' ,responsess);   
+ // console.log('react' ,responsess);   
 
   return (
     <div className="bg-white">
@@ -128,7 +132,7 @@ export default async function Example() {
               </div>
               <p className="mt-1 text-lg font-medium text-gray-900">{responsess.productName}</p>
               <p className="mt-1 text-lg font-medium text-gray-900">{responsess.price} {responsess.currency}</p>
-              <p className="mt-1 text-lg font-medium text-gray-900">Details:</p>
+              <p className="mt-1 text-lg font-medium text-gray-900"></p>
               <h6 className="mt-4 text-sm text-gray-700">{responsess.longDescription}</h6>
             </a>
           ))}
