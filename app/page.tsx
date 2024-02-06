@@ -98,8 +98,8 @@ const DATA_SOURSE_URL_GET_PRODUCTS = "https://kv7kzm78.api.commercecloud.salesfo
       } 
     });
     const result = await res.json(); 
-     console.log('response from api' ,result.hits);   
-    console.log('response from api' ,result.hits[0].variationAttributes.values[0]);
+    //  console.log('response from api' ,result.hits);   
+    // console.log('response from api' ,result.hits[0].variationAttributes.values[0]);
 
     return result.hits;
     
@@ -114,7 +114,7 @@ export default async function Example() {
         <h2 className="sr-only">Products</h2>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-          {responsess.map((responsess: { productId: Key | null | undefined; link: string | undefined; image: { disBaseLink: string | undefined; alt: string | undefined; }; productName: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; price: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; currency: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; longDescription: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; }) => (
+          {(responsess || []).map((responsess: { productId: Key | null | undefined; link: string | undefined; image: { disBaseLink: string | undefined; alt: string | undefined; }; productName: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; price: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; currency: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; longDescription: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; }) => (
             <a key={responsess.productId} href={responsess.link} className="group">
               <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
                 <img
