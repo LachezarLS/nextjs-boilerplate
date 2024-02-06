@@ -63,7 +63,7 @@ async function GetToken() {
   const reponse = await GetTokenRequestVars(); 
   //onsole.log('The reponse' ,reponse.headers.get('location')); 
   var stringValue = Format(reponse.headers.get('location'));
-  //console.log('TheTokenStringValue' ,stringValue);  
+  console.log('TheTokenStringValue' ,stringValue);  
   const res = await fetch(DATA_SOURSE_URL_GET_TOKEN, { 
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -83,7 +83,7 @@ async function GetToken() {
   })
 
   const result = await res.json(); 
-  //console.log('response from api GetToken' ,result);  
+  console.log('response from api GetToken' ,result);  
   return result;
   
 }
@@ -98,7 +98,7 @@ const DATA_SOURSE_URL_GET_PRODUCTS = "https://kv7kzm78.api.commercecloud.salesfo
       } 
     });
     const result = await res.json(); 
-    //  console.log('response from api' ,result.hits);   
+    console.log('response from api' ,result.hits);   
     // console.log('response from api' ,result.hits[0].variationAttributes.values[0]);
 
     return result.hits;
@@ -107,7 +107,10 @@ const DATA_SOURSE_URL_GET_PRODUCTS = "https://kv7kzm78.api.commercecloud.salesfo
 
 
 export default async function Example() {
+
   const responsess = await GetProducts();
+  console.log('react' ,responsess);   
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
