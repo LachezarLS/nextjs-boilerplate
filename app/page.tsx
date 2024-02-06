@@ -46,13 +46,17 @@ async function GetTokenRequestVars() {
 const DATA_SOURSE_URL_GET_TOKEN = "https://kv7kzm78.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/f_ecom_zzrl_059/oauth2/token"
 
 function Format(linkString: string | null) {
-  var mySubStringCode= linkString.substring(
-    linkString.indexOf("code=") + 5
-); 
-var mySubStringUsid = linkString.substring( 
-  linkString.indexOf("usid=") + 5, 
-  linkString.lastIndexOf("&")
-);
+  var mySubStringCode = '';
+  var mySubStringUsid = '';
+  if(linkString) {
+    mySubStringCode = linkString.substring(
+      linkString.indexOf("code=") + 5
+  ); 
+    mySubStringUsid = linkString.substring( 
+      linkString.indexOf("usid=") + 5, 
+      linkString.lastIndexOf("&")
+  );
+  }
   return [mySubStringCode, mySubStringUsid];
 }
 
@@ -68,13 +72,13 @@ async function GetToken() {
     method: 'POST',
     redirect: "manual", 
     body: new URLSearchParams({
-      'code': stringValue[0], 
+      'code': stringValue[0],
       'grant_type': 'authorization_code_pkce',
       'redirect_uri': 'http://localhost:3000/callback',
       'code_verifier': verifier,
       'channel_id': 'RefArch',
       'client_id': 'aeef000c-c4c6-4e7e-96db-a98ee36c6292',
-      'usid': stringValue[1] 
+      'usid': stringValue[1]
     })
   
   })
